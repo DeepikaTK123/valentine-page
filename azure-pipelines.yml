@@ -75,5 +75,5 @@ stages:
       displayName: 'Deploy Backend to Azure App Service'
       inputs:
         azureSubscription: 'azure-service-connection'
-        appName: 'pricepredictor-backend'
+        appName: 'pricepredictor-backendd'
         package: 'backend'
