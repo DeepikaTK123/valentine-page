@@ -12,7 +12,6 @@ stages:
     displayName: Build Backend and Frontend
     steps:
 
-    # 🔥 FORCE CLEAN CHECKOUT
     - checkout: self
       clean: true
 
@@ -28,13 +27,12 @@ stages:
         pip install -r requirements.txt
       displayName: 'Install backend dependencies'
 
-    # ---------------- FRONTEND (VITE ONLY) ----------------
+    # ---------------- FRONTEND ----------------
     - task: NodeTool@0
       inputs:
         versionSpec: '20.x'
       displayName: 'Use Node.js 20'
 
-    # 🔥 DELETE ANY OLD CRA ARTIFACTS
     - script: |
         rm -rf frontend/node_modules
         rm -f frontend/package-lock.json
@@ -49,3 +47,11 @@ stages:
         cd frontend
         npm run build
       displayName: 'Build Vite React app'
+
+    # ---------------- DEPLOY FRONTEND ----------------
+    - task: AzureStaticWebApp@0
+      displayName: 'Deploy Frontend to Azure Static Web App'
+      inputs:
+        app_location: "frontend"
+        output_location: "dist"
+        azure_static_web_apps_api_token: $(STATIC_WEB_APP_TOKEN)
