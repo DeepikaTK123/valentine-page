@@ -5,8 +5,10 @@ function App() {
   const [price, setPrice] = useState("");
   const [result, setResult] = useState(null);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const calculateGST = async () => {
-    const response = await fetch("http://localhost:5000/calculate-gst", {
+    const response = await fetch(`${API_URL}/calculate-gst`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
