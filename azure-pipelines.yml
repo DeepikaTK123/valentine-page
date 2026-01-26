@@ -5,6 +5,9 @@ pool:
   vmImage: ubuntu-latest
 
 stages:
+# =========================================================
+# BUILD STAGE
+# =========================================================
 - stage: Build
   displayName: Build Stage
   jobs:
@@ -12,14 +15,15 @@ stages:
     displayName: Build Backend and Frontend
     steps:
 
+    # Clean checkout
     - checkout: self
       clean: true
 
-    # ---------------- BACKEND ----------------
+    # ---------------- BACKEND BUILD ----------------
     - task: UsePythonVersion@0
+      displayName: 'Use Python 3.10'
       inputs:
         versionSpec: '3.10'
-      displayName: 'Use Python 3.10'
 
     - script: |
         cd backend
@@ -27,16 +31,16 @@ stages:
         pip install -r requirements.txt
       displayName: 'Install backend dependencies'
 
-    # ---------------- FRONTEND ----------------
+    # ---------------- FRONTEND BUILD ----------------
     - task: NodeTool@0
+      displayName: 'Use Node.js 20'
       inputs:
         versionSpec: '20.x'
-      displayName: 'Use Node.js 20'
 
     - script: |
         rm -rf frontend/node_modules
         rm -f frontend/package-lock.json
-      displayName: 'Clean old frontend artifacts'
+      displayName: 'Clean frontend artifacts'
 
     - script: |
         cd frontend
@@ -55,3 +59,21 @@ stages:
         app_location: "frontend"
         output_location: "dist"
         azure_static_web_apps_api_token: $(STATIC_WEB_APP_TOKEN)
+
+# =========================================================
+# DEPLOY BACKEND STAGE
+# =========================================================
+- stage: Deploy_Backend
+  displayName: Deploy Backend Stage
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - job: DeployBackend
+    displayName: Deploy Flask Backend
+    steps:
+    - task: AzureWebApp@1
+      displayName: 'Deploy Backend to Azure App Service'
+      inputs:
+        azureSubscription: 'azure-service-connection'
+        appName: 'pricepredictor-backend'
+        package: 'backend'
