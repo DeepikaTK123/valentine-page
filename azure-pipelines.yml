@@ -12,6 +12,10 @@ stages:
     displayName: Build Backend and Frontend
     steps:
 
+    # 🔥 FORCE CLEAN CHECKOUT
+    - checkout: self
+      clean: true
+
     # ---------------- BACKEND ----------------
     - task: UsePythonVersion@0
       inputs:
@@ -24,11 +28,17 @@ stages:
         pip install -r requirements.txt
       displayName: 'Install backend dependencies'
 
-    # ---------------- FRONTEND (VITE) ----------------
+    # ---------------- FRONTEND (VITE ONLY) ----------------
     - task: NodeTool@0
       inputs:
         versionSpec: '20.x'
       displayName: 'Use Node.js 20'
+
+    # 🔥 DELETE ANY OLD CRA ARTIFACTS
+    - script: |
+        rm -rf frontend/node_modules
+        rm -f frontend/package-lock.json
+      displayName: 'Clean old frontend artifacts'
 
     - script: |
         cd frontend
