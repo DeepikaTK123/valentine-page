@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Be My Valentine 💖</title>
+
+<style>
+body {
+  margin: 0;
+  height: 100vh;
+  background: linear-gradient(135deg, #ff758c, #ff7eb3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Segoe UI', sans-serif;
+  overflow: hidden;
+}
+
+.card {
+  background: white;
+  padding: 35px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  max-width: 480px;
+  animation: fadeIn 1s ease;
+  z-index: 2;
+}
+
+h1 { color: #e63946; }
+
+.emoji {
+  font-size: 55px;
+  margin-bottom: 10px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  50% { transform: scale(1.1); }
+}
+
+button {
+  padding: 12px 24px;
+  margin: 10px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+
+.yes { background-color: #e63946; color: white; }
+.no { background-color: #dee2e6; position: absolute; }
+.option { background-color: #ffb3c6; }
+
+textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 15px;
+  border-radius: 10px;
+  border: 2px solid #ffb3c6;
+  font-size: 16px;
+  resize: none;
+}
+
+.hidden { display: none; }
+
+.final {
+  font-size: 17px;
+  color: #e63946;
+  white-space: pre-line;
+  text-align: left;
+}
+
+.heart {
+  position: absolute;
+  font-size: 18px;
+  animation: floatUp 6s linear infinite;
+}
+
+@keyframes floatUp {
+  from { transform: translateY(100vh); opacity: 1; }
+  to { transform: translateY(-10vh); opacity: 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Heart burst */
+.burst {
+  position: absolute;
+  font-size: 25px;
+  animation: burst 1.5s ease forwards;
+}
+
+@keyframes burst {
+  0% { transform: scale(0); opacity: 1; }
+  100% { transform: scale(3); opacity: 0; }
+}
+</style>
+</head>
+
+<body>
+
+<audio id="bgMusic" loop>
+  <source src="pretty-little-baby.mp3" type="audio/mpeg">
+</audio>
+
+
+<!-- Start Card -->
+<div class="card" id="start">
+  <div class="emoji">💖</div>
+  <h1>Will you be my Valentine?</h1>
+  <p>I promise smiles, care & endless affection 😌</p>
+  <button class="yes" onclick="startQuestions()">Yes 💕</button>
+  <button class="no" onmouseover="moveNo()">No 🙈</button>
+</div>
+
+<!-- Question Card -->
+<div class="card hidden" id="questionCard">
+  <div class="emoji">💌</div>
+  <h1 id="question"></h1>
+  <div id="options"></div>
+</div>
+
+<!-- Love Letter Card -->
+<div class="card hidden" id="surpriseCard">
+  <div class="emoji">💌</div>
+  <h1>For You ❤️</h1>
+  <p class="final" id="loveNote"></p>
+  <button class="yes" onclick="showValentine()">Next 💕</button>
+</div>
+
+<!-- Final Valentine Card -->
+<div class="card hidden" id="valentineCard">
+  <div class="emoji">💘</div>
+  <h1>Happy Valentine’s Day My Love💖</h1>
+  <p style="font-size:20px; color:#e63946;">
+    <br><br>
+    Love you forever and always 💞
+  </p>
+</div>
+
+<script>
+
+const questions = [
+  {
+    q: "Choose between Mojo Pizza 🍕 and me 😌",
+    options: ["You ❤️", "You, always 😘"]
+  },
+  {
+    q: "When did you start liking me? 😌",
+    textBox: true
+  },
+  {
+    q: "Do you want to see the surprise? 🎁",
+    options: ["Yes 😍", "Obviously 💕"]
+  }
+];
+
+const loveLetter = `
+Thank you so much for everything you have given me so far.
+Honestly, I don’t even know where to begin.
+
+I know there have been many times when I hurt you — sometimes by talking about things you were uncomfortable with, sometimes by fighting over unnecessary issues, and sometimes by reacting in anger. There were moments I hurt you without realizing it… and there were also moments I knew I was hurting you but still did it. For all of that, I am truly and deeply sorry.
+
+Before I met you, I used to think life was simple and easy. I didn’t really stop to think about how my actions affected others. But after meeting you, I slowly began to understand what is right and what is wrong. You made me reflect. You made me grow. You helped me become more aware of myself. Thank you for teaching me that without ever trying to control me.
+
+Thank you for every small and big thing you’ve done for me. The pink gown you gifted me is still one of my favorites. The ring, the massager, the polaroid, the heat bag, and the chocolates you brought me during my periods — those gestures meant more to me than you know. You always made me feel cared for and safe.
+
+And how could I ever forget the website you built for my first birthday? It was one of the sweetest surprises of my life. I felt so loved and special that day.
+
+I know I have hurt you. I am genuinely sorry for that. I cannot promise that I will never make mistakes again, because we are human and emotions can sometimes take over. But I promise that hurting you is never my intention. I promise I will try harder, think more, and be better for us.
+
+Thank you for making me laugh.
+Thank you for standing by me when I feel lost.
+Thank you for choosing me.
+
+I love you. Every time I think about you, I still blush.
+You are my best friend, my partner, my comfort, and my everything.
+
+It has been two beautiful years, and I hope we will share 50 more… even 75 sounds perfect to me.
+
+I love you. Always and forever. ❤️
+`;
+
+let current = 0;
+
+function startQuestions() {
+  document.getElementById("bgMusic").play();
+  document.getElementById("start").classList.add("hidden");
+  document.getElementById("questionCard").classList.remove("hidden");
+  showQuestion();
+}
+
+function showQuestion() {
+  const q = questions[current];
+  document.getElementById("question").innerText = q.q;
+  const optionsDiv = document.getElementById("options");
+  optionsDiv.innerHTML = "";
+
+  if (q.textBox) {
+    const textarea = document.createElement("textarea");
+    textarea.placeholder = "Tell me honestly… 💖";
+
+    const btn = document.createElement("button");
+    btn.className = "option";
+    btn.innerText = "Submit 💕";
+    btn.onclick = () => {
+      if (!textarea.value.trim()) {
+        alert("Please type something 🥺");
+        return;
+      }
+      nextQuestion();
+    };
+
+    optionsDiv.appendChild(textarea);
+    optionsDiv.appendChild(btn);
+  } else {
+    q.options.forEach(opt => {
+      const btn = document.createElement("button");
+      btn.className = "option";
+      btn.innerText = opt;
+      btn.onclick = nextQuestion;
+      optionsDiv.appendChild(btn);
+    });
+  }
+}
+
+function nextQuestion() {
+  current++;
+  if (current < questions.length) {
+    showQuestion();
+  } else {
+    document.getElementById("questionCard").classList.add("hidden");
+    document.getElementById("surpriseCard").classList.remove("hidden");
+    document.getElementById("loveNote").innerText = loveLetter;
+  }
+}
+
+function showValentine() {
+  document.getElementById("surpriseCard").classList.add("hidden");
+  document.getElementById("valentineCard").classList.remove("hidden");
+  heartBurst();
+}
+
+function heartBurst() {
+  for (let i = 0; i < 25; i++) {
+    const heart = document.createElement("div");
+    heart.className = "burst";
+    heart.innerHTML = "💖";
+    heart.style.left = Math.random() * window.innerWidth + "px";
+    heart.style.top = Math.random() * window.innerHeight + "px";
+    document.body.appendChild(heart);
+    setTimeout(() => heart.remove(), 1500);
+  }
+}
+
+function moveNo() {
+  const button = document.querySelector('.no');
+  button.style.left = Math.random() * (window.innerWidth - 120) + "px";
+  button.style.top = Math.random() * (window.innerHeight - 60) + "px";
+}
+
+/* Floating background hearts */
+setInterval(() => {
+  const heart = document.createElement("div");
+  heart.className = "heart";
+  heart.innerHTML = "❤️";
+  heart.style.left = Math.random() * 100 + "vw";
+  heart.style.color = "rgba(255,255,255,0.8)";
+  document.body.appendChild(heart);
+  setTimeout(() => heart.remove(), 6000);
+}, 500);
+
+</script>
+
+</body>
+</html>
